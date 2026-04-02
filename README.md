@@ -32,25 +32,30 @@ viewing, filtering, and updating their status.
 
 ### 1. Clone Repository
 
-git clone `<your-repo-link>`{=html} cd candidate_api
+```bash
+git clone https://github.com/AryanAggarwal15/CandidateManagementSystem.git
+cd CandidateManagementSystem
+```
 
-### 2. Create Virtual Environment
+### 2. Install Dependencies
 
-python -m venv venv venv`\Scripts`{=tex}`\activate`{=tex}
-
-### 3. Install Dependencies
-
+```bash
 pip install -r requirements.txt
+```
 
-### 4. Run Backend
+### 3. Run Backend
 
+```bash
 python -m uvicorn main:app --reload
+```
 
 Backend URL: http://127.0.0.1:8000
 
-### 5. Run Frontend
+### 4. Run Frontend
 
+```bash
 python -m http.server 5500
+```
 
 Frontend URL: http://127.0.0.1:5500
 
