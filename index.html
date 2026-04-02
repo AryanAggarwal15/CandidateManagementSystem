@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Candidate Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f4f6f9;
+        }
+
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: #333;
+            padding: 10px;
+        }
+
+        nav button {
+            background: #555;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        nav button:hover {
+            background: #4CAF50;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        button.action {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Candidate Management System</h1>
+</header>
+
+<nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('create')">Create Candidate</button>
+    <button onclick="showSection('view')">View Candidates</button>
+    <button onclick="showSection('update')">Update Status</button>
+</nav>
+
+<div class="container">
+
+    <!-- HOME -->
+    <div id="home" class="card">
+        <h2>Welcome</h2>
+        <p>Select an option from above to manage candidates.</p>
+    </div>
+
+    <!-- CREATE -->
+    <div id="create" class="card hidden">
+        <h2>Create Candidate</h2>
+        <input id="name" placeholder="Name">
+        <input id="email" placeholder="Email">
+        <input id="skill" placeholder="Skill">
+
+        <select id="status">
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="selected">Selected</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        <br><br>
+        <button class="action" onclick="addCandidate()">Add Candidate</button>
+    </div>
+
+    <!-- VIEW -->
+    <div id="view" class="card hidden">
+        <h2>All Candidates</h2>
+
+        <select id="filterStatus">
+            <option value="">All</option>
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="selected">Selected</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        <button class="action" onclick="getCandidates()">Load</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Skill</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- UPDATE -->
+    <div id="update" class="card hidden">
+        <h2>Update Candidate Status</h2>
+
+        <input id="updateId" placeholder="Candidate ID">
+
+        <select id="newStatus">
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="selected">Selected</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        <br><br>
+        <button class="action" onclick="updateStatus()">Update Status</button>
+    </div>
+
+</div>
+
+<script>
+    const API = "http://127.0.0.1:8000";
+
+    function showSection(id) {
+        document.querySelectorAll(".card").forEach(c => c.classList.add("hidden"));
+        document.getElementById(id).classList.remove("hidden");
+    }
+
+    async function addCandidate() {
+        const data = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            skill: document.getElementById("skill").value,
+            status: document.getElementById("status").value
+        };
+
+        const res = await fetch(API + "/candidates", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+
+        if(res.ok) alert("Candidate Added!");
+        else alert("Error adding candidate");
+    }
+
+    async function getCandidates() {
+        const status = document.getElementById("filterStatus").value;
+        let url = API + "/candidates";
+
+        if (status) url += "?status=" + status;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const table = document.getElementById("tableBody");
+        table.innerHTML = "";
+
+        data.forEach(c => {
+            table.innerHTML += `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.name}</td>
+                    <td>${c.email}</td>
+                    <td>${c.skill}</td>
+                    <td>${c.status}</td>
+                </tr>
+            `;
+        });
+    }
+
+    async function updateStatus() {
+        const id = document.getElementById("updateId").value;
+        const status = document.getElementById("newStatus").value;
+
+        const res = await fetch(API + `/candidates/${id}/status`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({status})
+        });
+
+        if(res.ok) alert("Updated successfully!");
+        else alert("Error updating");
+    }
+</script>
+
+</body>
+</html>
